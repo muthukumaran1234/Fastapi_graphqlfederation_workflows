@@ -1,0 +1,4 @@
+dynamic_config:
+  - key: "frontend.enableUpdateWorkflowExecution"
+    value: true
+    filters: {}

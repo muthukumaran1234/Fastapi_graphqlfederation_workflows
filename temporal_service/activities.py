@@ -27,7 +27,7 @@ async def create_user(user_data: dict) -> int:
 async def assign_role(user_id: int, role_id: int) -> bool:
     result = await call_graphql(
         ROLE_URL,
-        "mutation($input: RoleMapInput!) { createRoleMap(input: $input) { id } }",
+        "mutation($input: CreateRoleMap!) { createRoleMap(input: $input) { id } }",
         {"input": {"user_id": user_id, "role_id": role_id}}
     )
     return "data" in result and "createRoleMap" in result["data"]

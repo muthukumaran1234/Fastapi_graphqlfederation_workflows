@@ -1,7 +1,0 @@
-  worker:
-    build:
-      context: ./worker
-    depends_on:
-      - temporal
-    networks:
-      - app-network

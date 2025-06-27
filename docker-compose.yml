@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: temporal
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  temporal:
+    image: temporalio/server:1.21.3
+    depends_on:
+      - postgres
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=postgres
+      - ENABLE_ES=false
+    ports:
+      - "7233:7233"
+    volumes:
+      - ./config/dynamicconfig:/etc/temporal/config/dynamicconfig
+    command: >
+      bash -c "
+        temporal-sql-tool --plugin postgres --ep postgres -u temporal -p 5432 --db temporal setup-schema -v 0.0 &&
+        temporal-sql-tool --plugin postgres --ep postgres -u temporal -p 5432 --db temporal update-schema -d /etc/temporal/schema/postgresql/v96/versioned &&
+        temporal-sql-tool --plugin postgres --ep postgres -u temporal -p 5432 --db temporal_visibility setup-schema -v 0.0 &&
+        temporal-sql-tool --plugin postgres --ep postgres -u temporal -p 5432 --db temporal_visibility update-schema -d /etc/temporal/schema/postgresql/v96/visibility/versioned &&
+        temporal-server start
+      "
+
+  worker:
+    build:
+      context: ./temporal_service
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+    command: ["python", "worker.py"]
+
+volumes:
+  pg_data:

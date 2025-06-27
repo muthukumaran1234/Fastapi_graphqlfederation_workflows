@@ -19,8 +19,8 @@ class Query:
 
     @strawberry.field
     async def get_role_maps(info:Info)->List[GetRoleMap]:
-        db:AsyncSession=info.context["db"]
-        
+        db = info.context["db"]
+        print(db)
         results=await db.execute(select(RoleMapping))
         role_maps=results.scalars().all()
         return role_maps

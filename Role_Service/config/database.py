@@ -12,8 +12,10 @@ Sessionlocal = async_sessionmaker(bind=engine,expire_on_commit=False,class_=Asyn
 async def get_connection():
     async with Sessionlocal() as session:
         yield session
-        
+# print(get_connection,"-----------------------connection")
 async def get_context():
-    db = get_connection
-    return {"db":db}
+    async with Sessionlocal() as session:
+        return {"db":session}
+    
+# print(get_context,"--------------------------context")
 
